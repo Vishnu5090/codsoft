@@ -1,0 +1,42 @@
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        int sum = 0;
+        int avg = 0;
+        
+        Scanner input = new Scanner(System.in);
+        System.out.println("Enter the number of subjects:");
+        int b = input.nextInt();
+        
+        for (int i = 1; i <= b; i++) {
+            if (i == 1) {
+                System.out.println("Enter " + i + "st subject mark:");
+            } else if (i == 2) {
+                System.out.println("Enter " + i + "nd subject mark:");
+            } else if (i == 3) {
+                System.out.println("Enter " + i + "rd subject mark:");
+            } else {
+                System.out.println("Enter " + i + "th subject mark:");
+            }
+            int a = input.nextInt();
+            sum += a;
+        }
+        
+        System.out.println("Total Marks: " + sum);
+        
+        avg = sum / b; 
+        System.out.println("Average Marks: " + avg);
+        if (avg >= 90) {
+            System.out.println("Your grade is: A");
+        } else if (avg >= 75) {
+            System.out.println("Your grade is: B");
+        } else if (avg >= 55) {
+            System.out.println("Your grade is: C");
+        } else {
+            System.out.println("Your grade is: U (Fail)");
+        }
+        
+        input.close();
+    }
+}
