@@ -1,0 +1,142 @@
+import java.util.*;
+
+class Quiz {
+    private static final int TIME_LIMIT = 10; 
+    private static final List<Question> questions = new ArrayList<>();
+    private int score = 0;
+    private final Scanner scanner = new Scanner(System.in);
+
+    public Quiz() {
+        questions.add(new Question("What is the capital of France?", 
+                new String[]{"A) Berlin", "B) Madrid", "C) Paris", "D) Rome"}, 'C'));
+        questions.add(new Question("Which data type is used to store decimal numbers in Java?", 
+                new String[]{"A) int", "B) float", "C) String", "D) char"}, 'B'));
+        questions.add(new Question("Who invented Java?", 
+                new String[]{"A) Dennis Ritchie", "B) James Gosling", "C) Bjarne Stroustrup", "D) Guido van Rossum"}, 'B'));
+        questions.add(new Question("Which keyword is used to define a constant in Java?", 
+                new String[]{"A) final", "B) static", "C) const", "D) var"}, 'A'));
+        questions.add(new Question("Which of these is not a Java feature?", 
+                new String[]{"A) Platform Independent", "B) Object-Oriented", "C) Secure", "D) Manual Memory Management"}, 'D'));
+    }
+    public void startQuiz() {
+        System.out.println("\nWelcome to the Java Quiz!");
+        System.out.println("You have " + TIME_LIMIT + " seconds per question.\n");
+
+        int questionNumber = 1;
+        for (Question question : questions) {
+            System.out.println("Question " + questionNumber + ": " + question.getQuestion());
+            for (String option : question.getOptions()) {
+                System.out.println(option);
+            }
+
+            char userAnswer = getUserAnswerWithTimer();
+            if (userAnswer == question.getCorrectAnswer()) {
+                System.out.println("✅ Correct!\n");
+                score++;
+            } else if (userAnswer == 'X') {
+                System.out.println("⏳ Time's up! No answer selected.\n");
+            } else {
+                System.out.println("❌ Wrong! The correct answer was: " + question.getCorrectAnswer() + "\n");
+            }
+
+            questionNumber++;
+        }
+
+        showResults();
+        scanner.close();
+    }
+
+    private char getUserAnswerWithTimer() {
+        Timer timer = new Timer();
+        AnswerCollector collector = new AnswerCollector();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!collector.hasAnswered()) {
+                    System.out.println("\n⏳ Time's up! Moving to next question.");
+                    collector.setUserAnswer('X');
+                }
+            }
+        }, TIME_LIMIT * 1000); 
+
+      char userAnswer = collector.collectAnswer(scanner, TIME_LIMIT);
+;
+        timer.cancel();
+        return userAnswer;
+    }
+    private void showResults() {
+        System.out.println("\n🎯 Quiz Over! Your Final Score: " + score + " / " + questions.size());
+
+        System.out.println("\n📊 Summary:");
+        for (int i = 0; i < questions.size(); i++) {
+            Question q = questions.get(i);
+            System.out.println((i + 1) + ". " + q.getQuestion());
+            System.out.println("   ✅ Correct Answer: " + q.getCorrectAnswer());
+        }
+
+        System.out.println("\n🎉 Thank you for playing the Java Quiz!");
+    }
+    public static void main(String[] args) {
+        Quiz quiz = new Quiz();
+        quiz.startQuiz();
+    }
+}
+
+class Question {
+    private final String question;
+    private final String[] options;
+    private final char correctAnswer;
+
+    public Question(String question, String[] options, char correctAnswer) {
+        this.question = question;
+        this.options = options;
+        this.correctAnswer = correctAnswer;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public String[] getOptions() {
+        return options;
+    }
+
+    public char getCorrectAnswer() {
+        return correctAnswer;
+    }
+}
+class AnswerCollector {
+    private char userAnswer = '\0';
+    private boolean answered = false;
+
+    public char collectAnswer(Scanner scanner, int timeLimit) {
+        Thread inputThread = new Thread(() -> {
+            System.out.print("Your answer (A/B/C/D): ");
+            String input = scanner.next().toUpperCase();
+            if (input.length() == 1 && "ABCD".contains(input)) {
+                userAnswer = input.charAt(0);
+                answered = true;
+            } else {
+                System.out.println("Invalid input! Moving to next question.");
+                userAnswer = 'X'; 
+            }
+        });
+        inputThread.start();
+
+        try {
+            inputThread.join(timeLimit * 1000); 
+        } catch (InterruptedException ignored) {
+        }
+
+        return userAnswer;
+    }
+
+    public boolean hasAnswered() {
+        return answered;
+    }
+
+    public void setUserAnswer(char answer) {
+        this.userAnswer = answer;
+    }
+}
